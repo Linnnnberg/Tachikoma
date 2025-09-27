@@ -1,0 +1,122 @@
+name: Tachikoma CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  quick-checks:
+    name: Quick Checks (3 min max)
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+        cache: 'pip'
+        
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install pytest pytest-cov black flake8 mypy
+        
+    - name: Code formatting check
+      run: black --check tachikoma/ --diff
+      
+    - name: Linting
+      run: flake8 tachikoma/ --max-line-length=100 --ignore=E203,W503
+      
+    - name: Type checking
+      run: mypy tachikoma/ --ignore-missing-imports
+      
+    - name: Run tests
+      run: |
+        python -m pytest tachikoma/tests/ -v --tb=short --maxfail=3
+        python -m pytest tachikoma/tests/ --cov=tachikoma --cov-report=term-missing --cov-fail-under=80
+        
+    - name: Import test
+      run: python -c "import tachikoma; print('✅ Package imports successfully')"
+      
+    - name: Basic functionality test
+      run: |
+        python -c "
+        from tachikoma.config.settings import Settings
+        from tachikoma.core.agent import AgentCharacter
+        settings = Settings()
+        character = AgentCharacter(
+            name='Test Agent',
+            personality='helpful',
+            principles=['be helpful'],
+            expertise=['testing'],
+            communication_style='friendly'
+        )
+        print('✅ Core components work')
+        "
+
+  security-scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+        
+    - name: Install security tools
+      run: |
+        pip install safety bandit
+        
+    - name: Security check
+      run: |
+        safety check --json --output safety-report.json || true
+        bandit -r tachikoma/ -f json -o bandit-report.json || true
+        
+    - name: Upload security reports
+      uses: actions/upload-artifact@v3
+      with:
+        name: security-reports
+        path: |
+          safety-report.json
+          bandit-report.json
+
+  build-test:
+    name: Build Test
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+        
+    - name: Build package
+      run: |
+        python setup.py sdist bdist_wheel
+        
+    - name: Test package installation
+      run: |
+        pip install dist/*.whl
+        python -c "import tachikoma; print('✅ Package installs correctly')"
+        
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: dist-packages
+        path: dist/
