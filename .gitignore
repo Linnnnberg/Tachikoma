@@ -21,19 +21,13 @@ wheels/
 *.egg
 MANIFEST
 
-# Virtual Environment
+# Virtual environments
 venv/
 env/
 ENV/
 env.bak/
 venv.bak/
-
-# Environment Variables
-.env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
+.conda/
 
 # IDE
 .vscode/
@@ -51,29 +45,16 @@ venv.bak/
 ehthumbs.db
 Thumbs.db
 
-# Project Specific
-*.csv
-*.txt
+# Project specific
+.env
 *.log
+logs/
+exports/
 agent_states/
 conversation_cache/
 role_templates/
 model_cache/
 performance_logs/
 
-# Testing
-.pytest_cache/
-.coverage
-htmlcov/
-.tox/
-.nox/
-
-# Jupyter Notebook
-.ipynb_checkpoints
-
-# Redis
-dump.rdb
-
-# Gradio
-gradio_cached_examples/
-flagged/
+# Git
+.git/
