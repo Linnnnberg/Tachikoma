@@ -10,6 +10,7 @@ import asyncio
 import time
 from datetime import datetime, timedelta
 from .agent import AgentState, AgentDefinition, AgentRole, AgentPersonality, PoliticalProfile
+from .metrics import DynamicMetricsSystem
 
 
 class PerformanceMetrics:
@@ -63,13 +64,14 @@ class PerformanceMetrics:
 
 
 class ResourceScorer:
-    """Enhanced resource allocation and performance scoring system."""
+    """Enhanced resource allocation and performance scoring system with dynamic metrics."""
 
     def __init__(self):
         """Initialize the resource scorer."""
         self.performance_metrics: Dict[str, PerformanceMetrics] = {}
         self.resource_allocation_history: List[Dict[str, float]] = []
-        self.scoring_weights = {
+        self.dynamic_metrics = DynamicMetricsSystem()
+        self.legacy_weights = {
             "quality": 0.3,
             "collaboration": 0.2,
             "consensus": 0.2,
@@ -107,7 +109,7 @@ class ResourceScorer:
         total_score = 0.0
         total_weight = 0.0
         
-        for metric_type, weight in self.scoring_weights.items():
+        for metric_type, weight in self.legacy_weights.items():
             avg_score = metrics.get_average_score(metric_type)
             
             # Normalize response time (lower is better)
@@ -221,3 +223,86 @@ class ResourceScorer:
             "average_performance": total_score / agent_count if agent_count > 0 else 0.0,
             "allocation_history_length": len(self.resource_allocation_history)
         }
+    
+    async def calculate_dynamic_score(
+        self, 
+        agent_id: str, 
+        context: str, 
+        role: AgentRole
+    ) -> Tuple[float, Dict[str, float]]:
+        """Calculate agent score using dynamic metrics system."""
+        return await self.dynamic_metrics.calculate_agent_score(agent_id, context, role)
+    
+    async def allocate_resources_dynamic(
+        self, 
+        agents: Dict[str, AgentState], 
+        total_resources: float,
+        context: str = "general"
+    ) -> Dict[str, float]:
+        """Allocate resources using dynamic metrics system."""
+        if not agents:
+            return {}
+            
+        # Calculate dynamic scores for all agents
+        agent_scores = {}
+        for agent_id, agent_state in agents.items():
+            if hasattr(agent_state, 'definition') and agent_state.definition:
+                score, metric_values = await self.calculate_dynamic_score(
+                    agent_id, context, agent_state.definition.role
+                )
+                agent_scores[agent_id] = score
+            else:
+                # Fallback to legacy scoring
+                score = await self.score_agent_performance(agent_id, context, {})
+                agent_scores[agent_id] = score
+        
+        # Apply role-based adjustments
+        role_adjustments = {}
+        for agent_id, agent_state in agents.items():
+            if hasattr(agent_state, 'definition') and agent_state.definition:
+                role = agent_state.definition.role
+                if role.decision_authority == "Executive":
+                    role_adjustments[agent_id] = 1.5
+                elif role.decision_authority == "Advisory":
+                    role_adjustments[agent_id] = 1.2
+                else:
+                    role_adjustments[agent_id] = 1.0
+            else:
+                role_adjustments[agent_id] = 1.0
+                
+        # Calculate final allocation scores
+        final_scores = {}
+        for agent_id in agents:
+            base_score = agent_scores.get(agent_id, 0.0)
+            role_multiplier = role_adjustments.get(agent_id, 1.0)
+            final_scores[agent_id] = base_score * role_multiplier
+            
+        # Normalize scores to sum to 1.0
+        total_score = sum(final_scores.values())
+        if total_score == 0:
+            # Equal distribution if no scores
+            return {agent_id: total_resources / len(agents) for agent_id in agents}
+            
+        # Allocate resources proportionally
+        allocation = {}
+        for agent_id, score in final_scores.items():
+            allocation[agent_id] = (score / total_score) * total_resources
+            
+        # Store allocation history
+        self.resource_allocation_history.append({
+            "timestamp": datetime.now(),
+            "allocation": allocation.copy(),
+            "total_resources": total_resources,
+            "context": context,
+            "method": "dynamic"
+        })
+        
+        return allocation
+    
+    def set_peer_collector(self, message_passing):
+        """Set the peer assessment collector for dynamic metrics."""
+        self.dynamic_metrics.set_peer_collector(message_passing)
+    
+    async def get_metric_analysis(self, agent_id: str, context: str, role: AgentRole) -> Dict[str, Any]:
+        """Get detailed metric analysis for an agent."""
+        return self.dynamic_metrics.get_metric_summary(agent_id, context, role)
