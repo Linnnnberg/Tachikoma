@@ -26,7 +26,7 @@ class TachikomaOrchestrator:
         self.resource_scorer = ResourceScorer()
         self.role_suggester = RoleSuggestionEngine()
         self.message_passing = MessagePassing()
-        self.debate_protocol = DebateProtocol()
+        self.debate_protocol = DebateProtocol(self.message_passing)
         self.conversation_context: Dict[str, Any] = {}
 
     async def add_agent(self, definition: AgentDefinition) -> str:
