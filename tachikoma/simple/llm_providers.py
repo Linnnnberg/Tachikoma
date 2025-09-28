@@ -152,6 +152,7 @@ class HuggingFaceProvider(BaseLLMProvider):
             from transformers import AutoModelForCausalLM, AutoTokenizer
             import torch
             
+            self.torch = torch  # Store torch reference
             self.tokenizer = AutoTokenizer.from_pretrained(self.model_name)
             self.model = AutoModelForCausalLM.from_pretrained(
                 self.model_name,
@@ -188,7 +189,7 @@ class HuggingFaceProvider(BaseLLMProvider):
             inputs = self.tokenizer.encode(full_prompt, return_tensors="pt")
             
             # Generate response
-            with torch.no_grad():
+            with self.torch.no_grad():
                 outputs = self.model.generate(
                     inputs,
                     max_length=inputs.shape[1] + max_tokens,
