@@ -147,14 +147,122 @@ Key configuration areas:
 - **Performance**: Caching, concurrency limits
 - **Logging**: Log levels and file locations
 
+## Enhanced Multi-Dimensional Agent Architecture
+
+### **Agent Definition System**
+Tachikoma now supports a sophisticated multi-dimensional agent architecture:
+
+#### **1. Role Layer (Functional)**
+- **AgentRole**: Defines functional expertise and responsibilities
+- **Domains**: Legal, Marketing, Technology, Policy, Finance, etc.
+- **Decision Authority**: Advisory, Executive, Operational
+- **Context-Specific**: Roles that adapt to specific contexts
+
+#### **2. Personality Layer (Behavioral)**
+- **Communication Style**: Direct, Diplomatic, Analytical, Creative
+- **Risk Tolerance**: Conservative, Moderate, Aggressive
+- **Collaboration Style**: Competitive, Collaborative, Independent
+- **Principles**: Core values that guide decisions
+
+#### **3. Political Profile Layer (Ideological)**
+- **Political Spectrum**: Far Left to Far Right, Apolitical
+- **Economic View**: Socialist to Laissez-faire
+- **Social View**: Progressive to Traditionalist
+- **Key Issues**: Specific areas of focus
+- **Ideological Principles**: Core beliefs
+
+#### **4. Correlated Parameters Layer**
+- **Environmental Stance**: Environmentalist, Pragmatic, Skeptical
+- **Technology Approach**: Tech-optimist, Cautious, Skeptical
+- **Globalization View**: Globalist, Moderate, Nationalist
+- **Regulation Preference**: Pro-regulation, Balanced, Deregulation
+- **Social Equality Focus**: High, Moderate, Low
+- **Market Trust**: High, Moderate, Low
+
+### **Example Agent Definitions**
+
+#### **Legal Consultant (Functional + Political)**
+```python
+AgentDefinition(
+    role=AgentRole(
+        name="Legal Consultant",
+        domain="Legal",
+        responsibilities=["Compliance", "Risk assessment", "Regulatory guidance"],
+        required_expertise=["Corporate law", "Financial regulations", "Singapore law"],
+        decision_authority="Advisory"
+    ),
+    political_profile=PoliticalProfile(
+        political_spectrum=PoliticalSpectrum.CENTER,
+        economic_view=EconomicView.MIXED_ECONOMY,
+        key_issues=["Regulatory compliance", "Risk mitigation"]
+    ),
+    correlated_params=CorrelatedParameters(
+        regulation_preference="Pro-regulation",
+        market_trust="Moderate"
+    )
+)
+```
+
+#### **Marketing Strategist (Role + Personality + Political)**
+```python
+AgentDefinition(
+    role=AgentRole(
+        name="Marketing Strategist",
+        domain="Marketing",
+        responsibilities=["Brand strategy", "Customer acquisition", "Market analysis"],
+        required_expertise=["Digital marketing", "Consumer psychology", "Analytics"],
+        decision_authority="Operational"
+    ),
+    personality=AgentPersonality(
+        communication_style="Creative",
+        risk_tolerance="Moderate",
+        collaboration_style="Collaborative",
+        principles=["Data-driven", "Customer-first"]
+    ),
+    political_profile=PoliticalProfile(
+        political_spectrum=PoliticalSpectrum.CENTER_LEFT,
+        social_view=SocialView.PROGRESSIVE,
+        key_issues=["Consumer protection", "Digital privacy", "Inclusive marketing"]
+    )
+)
+```
+
+### **Context-Aware Agent Suggestion**
+
+The system now analyzes multiple dimensions when suggesting agents:
+
+1. **Functional Needs**: What roles are needed for the task?
+2. **Political Diversity**: What perspectives are missing?
+3. **Personality Balance**: What communication styles are needed?
+4. **Correlated Parameters**: What expertise areas are missing?
+
+### **Use Cases**
+
+#### **Startup Scenario**
+- **Context**: "I want to start a sustainable fintech in Germany"
+- **Suggested Agents**:
+  - Legal Consultant (German/EU regulations, pro-regulation)
+  - Technical Architect (Privacy-focused, GDPR compliance)
+  - Marketing Strategist (Sustainability-focused, progressive)
+  - Policy Advisor (EU regulatory expertise)
+  - Financial Advisor (Sustainable finance, ESG focus)
+
+#### **Corporate Strategy**
+- **Context**: "Develop ESG strategy for multinational corporation"
+- **Suggested Agents**:
+  - Policy Advisor (Progressive, environmental focus)
+  - Financial Advisor (ESG investing expertise)
+  - Legal Consultant (Regulatory compliance)
+  - Marketing Strategist (Sustainability branding)
+
 ## Next Steps
 
 1. **Complete Project Setup** ✅
-2. **Character Analysis** - Define agent character templates
-3. **Scoring Analysis** - Design resource scoring algorithms
-4. **Architecture Analysis** - Design event-driven architecture
-5. **UI Analysis** - Plan enhanced Gradio interface
-6. **Communication Analysis** - Research inter-agent protocols
+2. **Enhanced Agent Architecture** ✅
+3. **Core Implementation** - Build actual functionality for all modules
+4. **UI Enhancement** - Dynamic agent management interface
+5. **Testing Framework** - Multi-agent interaction testing
+6. **Documentation** - API docs and user guides
 
 See `Tachikoma_Project_Todo_List.md` for the complete development roadmap.
 
