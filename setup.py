@@ -50,14 +50,20 @@ setup(
             "mypy>=1.5.0",
             "pre-commit>=3.3.0",
         ],
-        "ui": [
-            "streamlit>=1.25.0",
-            "plotly>=5.15.0",
+        "llm": [
+            "transformers>=4.35.0",
+            "torch>=2.0.0",
+            "groq>=0.9.0",
+        ],
+        "viz": [
+            "plotly>=5.18.0",
+            "matplotlib>=3.7.0",
         ],
     },
     entry_points={
         "console_scripts": [
-            "tachikoma=tachikoma.main:main",
+            "tachikoma=tachikoma.main:main_sync",
+            "tachikoma-ui=streamlit:run tachikoma/ui/app.py",
         ],
     },
     include_package_data=True,
